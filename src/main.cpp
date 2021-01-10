@@ -63,6 +63,7 @@ void setup() {
 
   //  Some settings for FastLED
   FastLED.addLeds<WS2812B, PIN_LED, GRB>(g_LEDs, NUM_LEDS);           //  Define the type and color scheme for the LEDs
+  FastLED.setCorrection(TypicalLEDStrip);
   FastLED.setBrightness(g_brightness);                                //  Set the brightness (only initial)
   set_max_power_in_milliwatts(MAX_POWER);                             //  We wouldn't wanna blow anything up, would we now?
 
@@ -88,15 +89,22 @@ void loop() {
   for(;;)                                                                               //  A very tight loop - makes things faster
   {
     //  Handle the LEDs
+    // EVERY_N_MILLISECONDS(20)
+    // {
+    //   uint8_t hue = beatsin8(20, 0, 255);
+    //   fill_rainbow(g_LEDs, NUM_LEDS, hue, 1);
+    // }
+    
+    //g_brightness = 20;
+    
     EVERY_N_MILLISECONDS(20)
     {
-      uint8_t hue = beatsin8(20, 0, 255);
-      fill_rainbow(g_LEDs, NUM_LEDS, hue, 1);
+      //solid_gradient(232, 153, 14, 15, 43, 195);
+      //solid_white(Tungsten100W);
+      //solid_rainbow(0, 2);
+      running_rainbow(3, 1, false);
+      brightness_control(32, false, 2);
     }
-    g_brightness = 20;
-    FastLED.setBrightness(g_brightness);
-
-    calculate_actual_power();
 
     //  Handle the OLED Display
     g_OLED.home();
@@ -104,6 +112,7 @@ void loop() {
 
     EVERY_N_MILLISECONDS(1000)                                                          //  only update the OLED display every second, no need to go faster
     {
+      calculate_actual_power();
       g_OLED.setCursor(X_PADDING, Y_PADDING + g_LineHeight);
       g_OLED.printf("fps: %d @ B: %d", FastLED.getFPS(), actual_brightness);            //  display how fast FastLED can draw
       g_OLED.setCursor(X_PADDING, Y_PADDING + g_LineHeight * 2);
@@ -119,6 +128,7 @@ void loop() {
       g_OLED.sendBuffer();
     }
 
-    FastLED.delay(10);                                                                  //  show the leds, and introduce a little delay to the loop
+    //FastLED.delay(10);                                                                  //  show the leds, and introduce a little delay to the loop
+    FastLED.show();
   }
 }
