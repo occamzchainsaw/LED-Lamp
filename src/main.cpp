@@ -12,6 +12,7 @@
 #include <FastLED.h>                                                //  Great lib for the LEDs
 #include <Wifi.h>                                                   //  Handling the WiFi connection
 #include <ESPAsyncWebServer.h>                                      //  Asynchronous WebServer <3
+#include "ArduinoJson.h"
 
 //  stuff for the OLED display
 #define OLED_CLOCK  15                                              //  OLED clock pin
@@ -42,15 +43,23 @@ AsyncWebServer server(80);
 CRGB g_LEDs[NUM_LEDS] = {0};                                          //  Frame buffer for FastLED                                         
 uint8_t g_brightness = 16;                                            //  Brightness level for FastLED
 
+uint effect_selector = 0;
+
 //  My own includes, such as effects, website, and helper functions.
 //  These need to be down here, cause I'll use some extern variables
 //  in them, from this main.cpp file
 #include <website.h>
 #include <helpers.h>
 #include <light_control.h>
-#include <motion_control.h>
+
+byte g_red1, g_green1, g_blue1, g_red2, g_green2, g_blue2;
+byte rainbow_speed, rainbow_init_hue, rainbow_delta;
+int breathe_cycle, rainbow_cycle;
+bool g_breathing, rainbow_run, rainbow_down;
 
 void setup() {
+  //Serial.begin(9600);
+
   pinMode(PIN_LED, OUTPUT);                                           //  Set the LED data pin to output mode
 
   //  Some settings for the OLED
@@ -81,6 +90,39 @@ void setup() {
     request->send(200, "text/html", index_html);
   });
 
+  server.onRequestBody([](AsyncWebServerRequest * request, uint8_t *data, size_t len, size_t index, size_t total) {
+    if (request->url() == "/updateParameters") {
+      DynamicJsonDocument jsonDoc(2048);
+      auto error = deserializeJson(jsonDoc, (const char*)data);
+      if (error)
+      {
+          Serial.println(error.c_str());
+      }
+      else
+      {
+          std::string effect_type = jsonDoc["type"];
+          if (effect_type == "solid_color")
+          {
+            effect_selector = 1;
+            g_red1 = parseColor(jsonDoc["red"]);
+            g_green1 = parseColor(jsonDoc["green"]);
+            g_blue1 = parseColor(jsonDoc["blue"]);
+            g_brightness = parseBrightness(jsonDoc["brightness"]);
+            g_breathing = parseBool(jsonDoc["breathingOn"]);
+          }
+          else if(effect_type == "rainbow")
+          {
+            effect_selector = 2;
+            rainbow_init_hue = parseColor(jsonDoc["init_hue"]);
+            rainbow_delta = parseDelta(jsonDoc["delta_hue"]);
+            rainbow_run = parseBool(jsonDoc["runningOn"]);
+            g_brightness = parseBrightness(jsonDoc["brightness"]);
+          }
+      }
+      request->send(200, "text/plain", "end");
+    }
+  });
+
   //  Start the WebServer - since it's asynchronous, we don't need to do anything else in the main loop
   server.begin();
 }
@@ -99,11 +141,38 @@ void loop() {
     
     EVERY_N_MILLISECONDS(20)
     {
+      switch (effect_selector) 
+      {
+        case 1:                                                         //  solid color fill
+          solid_color(g_red1, g_green1, g_blue1);
+          brightness_control(g_brightness, g_breathing, 2);
+          break;
+
+        case 2:                                                         //  rainbow controls
+          if (rainbow_run)
+            running_rainbow(3, rainbow_delta, false);                   //  this will be updated
+          else
+            solid_rainbow(rainbow_init_hue, rainbow_delta);
+          brightness_control(g_brightness, false, 2);
+          break;
+
+        default:
+          running_rainbow(3, 1, false);
+          brightness_control(32, false, 2);
+      }
       //solid_gradient(232, 153, 14, 15, 43, 195);
       //solid_white(Tungsten100W);
       //solid_rainbow(0, 2);
-      running_rainbow(3, 1, false);
-      brightness_control(32, false, 2);
+      // if (!flag)
+      // {
+      //   running_rainbow(3, 1, false);
+      //   brightness_control(32, false, 2);
+      // }
+      // else
+      // {
+      //   solid_color(g_red1, g_green1, g_blue1);
+      //   brightness_control(g_brightness, g_breathing, 2);
+      // }      
     }
 
     //  Handle the OLED Display

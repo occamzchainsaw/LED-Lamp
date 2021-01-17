@@ -33,7 +33,7 @@ void calculate_actual_power()
 void DrawPixels(double fPos, double count, CRGB color)
 {
   double availFirstPixel = 1.0 - (fPos - (long)(fPos));               //  (long)(fPos) trucates the float to a long, which has the effect of leaving you
-                                                                      //  with just the decimal part (after the .) - pretty neat little trick
+                                                                      //  with just the decimal part (after the subtracting from fPos) - pretty neat little trick
   double amtFirstPixel = min(availFirstPixel, count);
   count = min(count, FastLED.size() - fPos);
   
@@ -66,4 +66,30 @@ void DrawPixels(double fPos, double count, CRGB color)
       FastLED.leds()[(uint)fPos] += backColor;
     }
   }
+}
+
+byte parseColor(String color)
+{
+  float fColor = color.toFloat();
+  return (byte)fColor;
+}
+
+byte parseDelta(String deltaHue)
+{
+  float fDelta = deltaHue.toFloat();
+  return (byte)fDelta;
+}
+
+byte parseBrightness(String b)
+{
+    float brite = b.toFloat() / 100.0f;
+    return brite * 255;
+}
+
+bool parseBool(String sBool)
+{
+    if (sBool == "true")
+        return true;
+    else
+        return false;
 }

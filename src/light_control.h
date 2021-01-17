@@ -18,7 +18,8 @@ extern uint8_t g_brightness;
 #define MIN_BRIGHTNESS 12
 #define MIN_CYCLE_T 1
 
-#pragma region: //  Declarations
+//  Declarations
+
 //  Fill Solid
 //
 //  Converts chosen R, G, and B values to a color and fills the strip.
@@ -62,7 +63,8 @@ void solid_gradient(byte red1, byte green1, byte blue1, byte red2, byte green2, 
 //  Takes the cycle time, converts to bpm and oscillates based on a sine wave.
 //  If breathing effect is off, just set the brightness to the desired level.
 void brightness_control(byte brightness, bool breathe, int cycle_time);
-#pragma endregion
+
+//  Definitions
 
 void solid_color(byte red, byte green, byte blue)
 {
