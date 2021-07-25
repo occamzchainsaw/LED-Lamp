@@ -1,0 +1,13 @@
+{
+	"folders": [
+		{
+			"name": "LED Lamp",
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"functional": "cpp"
+		}
+	}
+}

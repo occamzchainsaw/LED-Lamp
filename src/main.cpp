@@ -1,7 +1,9 @@
 /*
  * main.cpp
  *
- * Created on Sun Jan 10 2021
+ * Created on   Sun Jan 10 2021
+ * Modified on  Tue Jul 20 2021
+ *                      - NUM_LEDS changed, cause I'm an idiot and had to cut one off
  *
  * Copyright (c) 2021 occamzchainsaw
  */
@@ -13,6 +15,17 @@
 #include <Wifi.h>                                                   //  Handling the WiFi connection
 #include <ESPAsyncWebServer.h>                                      //  Asynchronous WebServer <3
 #include "ArduinoJson.h"
+
+//  My own includes, such as effects, website, and helper functions.
+//  These need to be down here, cause I'll use some extern variables
+//  in them, from this main.cpp file
+#include <website.h>
+#include <helpers.h>
+#include <colour_lists.h>
+#include <light_control.h>
+#include <solid_colour.h>
+#include <colour_rotation.h>
+#include <lit_stuff.h>
 
 //  stuff for the OLED display
 #define OLED_CLOCK  15                                              //  OLED clock pin
@@ -28,37 +41,30 @@ int g_LineHeight = 0;
 uint g_oled_width = 0;
 uint g_oled_height = 0;
 
-//  WiFi credentials
-const char* ssid =      "FBI Surveillance Van #9973";
-const char* password =  "e4e5Nf3Nc6Bb5";
+//  WiFi credentials      *** THIS NEEDS TO BE CHANGED TO THE DESIRED CREDENTIALS EVERY TIME  ***
+const char* ssid =      "GMAp1_24";
+const char* password =  "pawela95";
 
 //  Webserver talking on port 80
 AsyncWebServer server(80);
 
 //  stuff for the RGB LEDs
 #define PIN_LED   5                                                   //  Data pin number
-#define NUM_LEDS  144                                                 //  Number of LEDs on the whole strip
-#define MAX_POWER 17500                                               //  Power limit for FastLED
 
 CRGB g_LEDs[NUM_LEDS] = {0};                                          //  Frame buffer for FastLED                                         
-uint8_t g_brightness = 16;                                            //  Brightness level for FastLED
+uint8_t g_brightness = 50;                                            //  Brightness level for FastLED
 
 uint effect_selector = 0;
-
-//  My own includes, such as effects, website, and helper functions.
-//  These need to be down here, cause I'll use some extern variables
-//  in them, from this main.cpp file
-#include <website.h>
-#include <helpers.h>
-#include <light_control.h>
 
 byte g_red1, g_green1, g_blue1, g_red2, g_green2, g_blue2;
 byte rainbow_speed, rainbow_init_hue, rainbow_delta;
 int breathe_cycle, rainbow_cycle;
 bool g_breathing, rainbow_run, rainbow_down;
 
+//  The setup routine runs when the ESP32 starts.
+//  It's used to configure some stuff for the OLED, the FastLED object, connect to the WiFi, and start the WebServer
 void setup() {
-  //Serial.begin(9600);
+  //Serial.begin(9600);                                               //  Used for serial monitor, if debugging is needed
 
   pinMode(PIN_LED, OUTPUT);                                           //  Set the LED data pin to output mode
 
@@ -72,7 +78,7 @@ void setup() {
 
   //  Some settings for FastLED
   FastLED.addLeds<WS2812B, PIN_LED, GRB>(g_LEDs, NUM_LEDS);           //  Define the type and color scheme for the LEDs
-  FastLED.setCorrection(TypicalLEDStrip);
+  FastLED.setCorrection(TypicalLEDStrip);                             //  Colour correction - basically less green, cause green LEDs are usually perceived the brightest
   FastLED.setBrightness(g_brightness);                                //  Set the brightness (only initial)
   set_max_power_in_milliwatts(MAX_POWER);                             //  We wouldn't wanna blow anything up, would we now?
 
@@ -83,7 +89,7 @@ void setup() {
     delay(500);
   }
 
-  //  This bit should handle all the requests made to the webserver
+  //  This should handle all the requests made to the webserver
   //  When root requested, send an HTML 200 code, and the actual HTML to display the web page
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
   {
@@ -127,59 +133,36 @@ void setup() {
   server.begin();
 }
 
+//  Main ESP32 loop
 void loop() {
+  //  Declare instances of the effects objects
+  SolidColourEffect solidColour(CRGB(70, 200, 0), true);
+  ColourRotationEffect colourRotation(CLRainbow, 0.75f);
+  FireEffect fire(NUM_LEDS, CLHeatMap, 30, 200, 17, false, false);
+  //FireEffect fire(NUM_LEDS, CLIceFire, 30, 200, 17, false, false);
+  //FireEffect fire(NUM_LEDS, CLGreenFire, 30, 200, 17, false, false);
+  
   for(;;)                                                                               //  A very tight loop - makes things faster
   {
-    //  Handle the LEDs
-    // EVERY_N_MILLISECONDS(20)
-    // {
-    //   uint8_t hue = beatsin8(20, 0, 255);
-    //   fill_rainbow(g_LEDs, NUM_LEDS, hue, 1);
-    // }
-    
-    //g_brightness = 20;
-    
-    EVERY_N_MILLISECONDS(20)
+    //  TESTING SECTION
+
+    EVERY_N_MILLISECONDS(fpsToMillis(50))
     {
-      switch (effect_selector) 
-      {
-        case 1:                                                         //  solid color fill
-          solid_color(g_red1, g_green1, g_blue1);
-          brightness_control(g_brightness, g_breathing, 2);
-          break;
-
-        case 2:                                                         //  rainbow controls
-          if (rainbow_run)
-            running_rainbow(3, rainbow_delta, false);                   //  this will be updated
-          else
-            solid_rainbow(rainbow_init_hue, rainbow_delta);
-          brightness_control(g_brightness, false, 2);
-          break;
-
-        default:
-          running_rainbow(3, 1, false);
-          brightness_control(32, false, 2);
-      }
-      //solid_gradient(232, 153, 14, 15, 43, 195);
-      //solid_white(Tungsten100W);
-      //solid_rainbow(0, 2);
-      // if (!flag)
-      // {
-      //   running_rainbow(3, 1, false);
-      //   brightness_control(32, false, 2);
-      // }
-      // else
-      // {
-      //   solid_color(g_red1, g_green1, g_blue1);
-      //   brightness_control(g_brightness, g_breathing, 2);
-      // }      
+      // uint8_t hue = beatsin8(20, 0, 255);
+      // fill_rainbow(g_LEDs, NUM_LEDS, hue, 1);
+      //running_rainbow(3,1,false);
+      //solidColour.draw(60);
+      //colourRotation.draw(60);
+      fire.draw(80);
     }
+    
+    //g_brightness = 80;
 
     //  Handle the OLED Display
     g_OLED.home();
     g_OLED.clearBuffer();
 
-    EVERY_N_MILLISECONDS(1000)                                                          //  only update the OLED display every second, no need to go faster
+    EVERY_N_MILLISECONDS(5000)                                                          //  only update the OLED display every second, no need to go faster
     {
       calculate_actual_power();
       g_OLED.setCursor(X_PADDING, Y_PADDING + g_LineHeight);
@@ -197,7 +180,7 @@ void loop() {
       g_OLED.sendBuffer();
     }
 
-    //FastLED.delay(10);                                                                  //  show the leds, and introduce a little delay to the loop
     FastLED.show();
+    //FastLED.delay(10);                                                                  //  show the leds, and introduce a little delay to the loop
   }
 }

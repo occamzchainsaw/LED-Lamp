@@ -8,6 +8,8 @@
  *
  * Copyright (c) 2021 occamzchainsaw
  */
+
+
 #include <Arduino.h>                                                //  Arduino Framework
 #define FASTLED_INTERNAL
 #include <FastLED.h>                                                //  Great lib for the LEDs
@@ -63,6 +65,7 @@ void solid_gradient(byte red1, byte green1, byte blue1, byte red2, byte green2, 
 //  Takes the cycle time, converts to bpm and oscillates based on a sine wave.
 //  If breathing effect is off, just set the brightness to the desired level.
 void brightness_control(byte brightness, bool breathe, int cycle_time);
+
 
 //  Definitions
 

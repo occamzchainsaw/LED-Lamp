@@ -10,6 +10,13 @@
       and other updates to the appearance -->
 <script>
   $(document).ready(function() {
+    window.addEventListener('load', function() {
+      document.getElementById('bVal').innerHTML = document.getElementById('solid-slider').value;
+      document.getElementById('rbVal').innerHTML = document.getElementById('rainbow-slider').value;
+      document.getElementById('hVal').innerHTML = document.getElementById('init-hue-slider').value;
+      document.getElementById('dhVal').innerHTML = document.getElementById('delta-hue-slider').value;
+    });
+
     $(".dropbtn").hover(function() {
       $(".dropdown-content").show();
     });
@@ -87,7 +94,7 @@ li a:hover, .dropbtn:hover .dropbtn {
   background-color: #008CBA;
 }
 
-li.dropdown {
+li.dropdown, li.wrapper-run-rainbow {
   display: inline-block;
 }
 
@@ -210,8 +217,10 @@ li.dropdown {
   <input type="range" min="1" max="100" value="20" class="bright-slider" id="rainbow-slider">
   <p>Current Brightness: <span id="rbVal"></span></p>
   <p>&nbsp;</p>
-  <input type="checkbox" name="run-rainbow" id="running-rainbow-checkbox">
-  <label for="breathe">Running</label>
+  <li class="wrapper-run-rainbow">
+    <input type="checkbox" name="run-rainbow" id="running-rainbow-checkbox">
+  <label for="run-rainbow">Running</label>
+  </li>
   <p>&nbsp;</p>
   <button class="sendbtn" onclick="sendParamsRainbow()">Lemme See</button>
 </div>
