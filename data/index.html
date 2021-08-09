@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="index.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="index.js"></script>
+    <script src="color-picker/html5kellycolorpicker.min.js"></script>
+    <script>
+        $(document).ready(function(){
+            $("a").click(function(){
+                $("a").removeClass("active");
+                $(this).addClass("active");
+            });
+        });
+    </script>
+    <title>LED Lamp Control</title>
+</head>
+<body>
+    <div class="navbar">
+        <a href="#" class="active" onclick="openPage('tab_solid', this)" id="default">Solid Colour</a>
+        <a href="#" onclick="openPage('tab_rotation', this)">Colour Rotation</a>
+        <a href="#" onclick="openPage('tab_rainbows', this)">Rainbows</a>
+        <a href="#" onclick="openPage('tab_fire', this)">Fire Effect</a>
+    </div>
+
+    <div id="tab_solid" class="tabcontent">
+        <h1>Solid Colour Control</h1>
+        <h3>Select a colour to light up the whole lamp with</h3>
+        <div class="box">
+            <canvas id="color-picker"></canvas><div class="color" id="colorBox"></div>
+        </div>
+    </div>
+    <div id="tab_rotation" class="tabcontent">
+        <h1>Colour Rotation Control</h1>
+        <h3>Select a palette of colours and watch the lamp rotate through it</h3>
+    </div>
+    <div id="tab_rainbows" class="tabcontent">
+        <h1>Rainbows Control</h1>
+        <h3>Knock yourself out with a rainbow puke</h3>
+        <h3>The rainbow may be statically displayed, run up or down the lamp, or oscillate through it</h3>
+    </div>
+    <div id="tab_fire" class="tabcontent">
+        <h1><span class="material-icons">local_fire_department</span> Fire Effect Control</h1>
+        <h3>Set shit on fire. You can also choose a colour palette to have icy or green fire</h3>
+    </div>
+    
+    <!-- This always runs at the start, and does some initialization stuff for me -->
+    <script>
+        document.getElementById("default").click();
+        var picker = new KellyColorPicker({
+            place : 'color-picker',
+            size : 250,
+            alpha_slider : false,
+            color : '#0079ff',
+            userEvents: {
+                change : function(picker) {
+                    //console.log(picker.getCurColorRgb());
+                    var red = picker.getCurColorRgb().r;
+                    var green = picker.getCurColorRgb().g;
+                    var blue = picker.getCurColorRgb().b;
+                    document.getElementById("colorBox").style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

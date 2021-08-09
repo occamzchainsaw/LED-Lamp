@@ -31,8 +31,8 @@ uint8_t actual_brightness;
 //  Caclulate the actual power consumption in Watts
 void calculate_actual_power()
 {
-    actual_brightness = calculate_max_brightness_for_power_mW(g_LEDs, NUM_LEDS, g_brightness, MAX_POWER);
-    uscaled_power = (float)calculate_unscaled_power_mW(g_LEDs, NUM_LEDS) / 1000.f;
+    actual_brightness = calculate_max_brightness_for_power_mW(FastLED.leds(), NUM_LEDS, FastLED.getBrightness(), MAX_POWER);
+    uscaled_power = (float)calculate_unscaled_power_mW(FastLED.leds(), NUM_LEDS) / 1000.f;
     actual_power = (float)actual_brightness / 255.0f * (float)uscaled_power;
 }
 

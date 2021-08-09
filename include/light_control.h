@@ -88,7 +88,7 @@ void solid_rainbow(byte initialHue, byte deltaHue)
 
 void oscillating_rainbow(int cycle_time, byte deltaHue)
 {
-    int bpm = 60 / max(cycle_time, MIN_CYCLE_T);                                        //  As much as I'd like to create a black hole, I can't.
+    int bpm = 60 / max(cycle_time, MIN_CYCLE_T);                                        //  As much as I'd like to create a black hole, I really shouldn't.
     uint8_t hue = beatsin8(bpm, 0, 255);
     fill_rainbow(g_LEDs, MAX_LEDS, hue, deltaHue);
 }
