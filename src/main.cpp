@@ -96,7 +96,6 @@ void setup() {
 void loop() {
   //  Declare instances of the effects objects
   SolidColourEffect solidColour(CRGB(70, 200, 0), true);
-  ColourRotationEffect colourRotation(CLRainbow, 0.75f);
   RainbowEffect rainbow;
   rainbow.NumRainbows = 1;
 
@@ -106,19 +105,11 @@ void loop() {
   {
     //  TESTING SECTION
 
-    EVERY_N_MILLISECONDS(fpsToMillis(50))
-    {
-      // uint8_t hue = beatsin8(20, 0, 255);
-      // fill_rainbow(g_LEDs, NUM_LEDS, hue, 1);
-      //running_rainbow(3,1,false);
-      //solidColour.draw(60);
-      //colourRotation.draw(80);
-      FireEffect(RedFire);
-      //rainbow.drawStatic(100);
-      //rainbow.drawRunning(100);
-      //rainbow.drawOscillating(200);
-      //fill_rainbow(FastLED.leds(), FastLED.size(), 0, 2);
-    }
+    // EVERY_N_MILLISECONDS(fpsToMillis(50))
+    // {
+      //FireEffect(RedFire);
+      ColorRotationEffect(Rainbow, 1000);
+    //}
     
     //g_brightness = 150;
 
@@ -144,6 +135,9 @@ void loop() {
       g_OLED.sendBuffer();
     }
 
+    uint8_t scaledBri = calculate_max_brightness_for_power_mW(FastLED.leds(), FastLED.size(), 180, MAX_POWER);
+    FastLED.setBrightness(scaledBri);
     FastLED.show();
+    FastLED.delay(fpsToMillis(50));
   }
 }

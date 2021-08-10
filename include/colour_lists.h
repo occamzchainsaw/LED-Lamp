@@ -25,6 +25,13 @@ std::list<CRGB> CLRainbow = {
     CRGB(171,   0,     85)      //  pink
 };
 
+CRGBPalette16 Rainbow = {
+    0xFF0000, 0xFF5E00, 0xFFBB00, 0xE5FF00,
+    0x88FF00, 0x2BFF00, 0x00FF33, 0x00FF91,
+    0x00FFEE, 0x00B3FF, 0x0055FF, 0x0800FF,
+    0x6600FF, 0xC300FF, 0xFF00DD, 0xFF0055
+};
+
 //  some ocean vibes, stolen from FastLED, ofc
 std::list<CRGB> CLOcean = {
     CRGB::MidnightBlue,

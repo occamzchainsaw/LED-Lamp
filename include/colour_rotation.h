@@ -12,54 +12,32 @@
 #include <Arduino.h>                                                //  Arduino Framework
 #define FASTLED_INTERNAL
 #include <FastLED.h>                                                //  Great lib for the LEDs
-#include <list>
-#include <iterator>
 
-class ColourRotationEffect
+#include <helpers.h>
+
+#define STEP_SIZE 16
+#define FADE_AMNT 2
+
+void ColorRotationEffect(CRGBPalette16 colorPalette, uint32_t staticTime, uint8_t startIndex = 0U)
 {
-    protected:
-        std::list<CRGB> ColoursList;                                //  List of colours to cycle through (see colour_lists.h)
-        CRGB CurrentColour;                                         //  Currently displayed colour (changes while fading)
-        CRGB NextColour;                                            //  Next colour on the list (crucial for blending one into the other)
-        uint32_t LastFade;
-        std::list<CRGB>::iterator Index;                            //  list iterator
-        float StaticTime;                                           //  How long each colour should be displayed [ms]
+    static uint32_t lastFade = millis();
+    static uint8_t index = startIndex;
+    static uint8_t value = 0;
+    static CRGB currentColor = ColorFromPalette(colorPalette, index);
+    static CRGB nextColor = ColorFromPalette(colorPalette, index+STEP_SIZE);
 
-    public:
-        ColourRotationEffect(std::list<CRGB> colours, float staticTime = 1.0f)
+    if (millis() - lastFade > staticTime)
+    {
+        currentColor = fadeTowardColour(currentColor, nextColor, FADE_AMNT);
+        value += FADE_AMNT;
+
+        if (value == 0)                                                                 //  only works with 256 % FADE_AMNT == 0
         {
-            ColoursList = colours;
-            CurrentColour = ColoursList.front();
-            Index = std::next(ColoursList.begin());
-            NextColour = *Index;
-            LastFade = millis();
-            StaticTime = staticTime * 1000.0f;
+            lastFade = millis();
+            index += STEP_SIZE;                                                         //  only works with 256 % STEP_SIZE == 0
+            nextColor = ColorFromPalette(colorPalette, index);
         }
+    }
 
-        ~ColourRotationEffect() {  }
-
-        void draw(uint8_t setBrightness)
-        {
-            uint8_t scaledBrightness = calculate_max_brightness_for_power_mW(FastLED.leds(), FastLED.size(), setBrightness, MAX_POWER);
-
-            if (millis() - LastFade > (uint32_t)StaticTime)                         //  Only change the colour if the current one has been displayed for a set amount of time
-            {
-                CurrentColour = fadeTowardColour(CurrentColour, NextColour, 2);     //  Fade the current colour towards the next by a small amount each cycle
-
-                if (CurrentColour == NextColour)
-                {
-                    LastFade = millis();
-                    Index = std::next(Index);
-                    if (Index == ColoursList.end())                         //  list.end() is actually next(list.back()), so one past the last element, so...
-                    {                                                       //  ...this is equivalent to saying index > list.size()
-                        Index = ColoursList.begin();                        //  Wrap the index around back to 0
-                    }
-                    NextColour = *Index;                                    //  Assign next colour according to the new iterator value
-                }
-            }
-            
-            fill_solid(FastLED.leds(), FastLED.size(), CurrentColour);
-            FastLED.setBrightness(scaledBrightness);
-        }
-
-};
+    fill_solid(FastLED.leds(), NUM_LEDS, currentColor);
+}
