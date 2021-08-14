@@ -91,7 +91,6 @@ inline float RandomFloat()
   return r;
 }
 
-
 inline double UnixTime()
 {
   timeval tv = {0};
@@ -158,24 +157,6 @@ CRGB mapU8toCRGB(uint8_t input, std::vector<CRGB> colours)
   }
 
   return colours[i - 1];
-}
-
-//  weightedAverage
-//
-//  Takes a vector of U8s and a vector of weights. Calcultes the weighted average of the U8s.
-//  NO ERROR CHECKING IS DONE. MAKE SURE THE VECTORS ARE THE SAME SIZE, YOU DUMB FUCK.
-uint8_t weightedAverage(std::vector<uint8_t> data, std::vector<uint8_t> weights)
-{
-  int size = data.size();
-  uint8_t nominator = 0;
-  uint8_t denominator = 0;
-  for (int i = 0; i < size; i++)
-  {
-    nominator += data[i] * weights[i];
-    denominator += weights[i];
-  }
-
-  return (nominator / denominator);
 }
 
 //  bunch of parsers for the web server

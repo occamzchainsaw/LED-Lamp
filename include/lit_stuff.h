@@ -14,10 +14,11 @@
 #include <FastLED.h>                                                //  Great lib for the LEDs
 #include <helpers.h>
 
-#define FIRE_COOLING 2250
-#define FIRE_SPARKING 220
-#define FIRE_SPARKS 4
-#define FIRE_SPARKING_REGION 15
+#define FIRE_COOLING            2250
+#define FIRE_SPARKING           230
+#define FIRE_SPARKS             4
+#define FIRE_SPARKING_REGION    15
+#define HEAT_SIZE               NUM_LEDS+20                         //  adding 20 elements, so that the sparking bottom of the flame is not actually drawn to the strip
 
 const byte w0 = 1;
 const byte w1 = 2;
@@ -32,17 +33,17 @@ const byte wTotal = w0 + w1 + w2 + w3 + w4 + w5 + w6 + w7;
 void FireEffect(CRGBPalette16 colorPalette)
 {
     //  array of temperatures for each pixel on the strip
-    static uint16_t heat[NUM_LEDS];
+    static uint16_t heat[HEAT_SIZE];
 
     //  cool every pixel by a random amount no larger than the cooling rate
-    for (uint8_t i = 0; i < NUM_LEDS; i++)
+    for (uint8_t i = 0; i < HEAT_SIZE; i++)
     {
         heat[i] = max(0, heat[i] - random16(0, FIRE_COOLING));
     }
 
     //  drift up, and blend with neighbours to diffuse the fire
     //  this is a mess, and won't scale at all, but I'm done giving fucks at this point.
-    for (uint8_t i = NUM_LEDS; i >= 7; i--)
+    for (uint8_t i = HEAT_SIZE; i >= 7; i--)
     {
         heat[i] = ( heat[i]   * w0 + 
                     heat[i-1] * w1 + 
@@ -67,10 +68,10 @@ void FireEffect(CRGBPalette16 colorPalette)
     //  quick clear of the strip before drawing
     FastLED.clear();
 
-    //  assign a color value to each pixel based on it's heat value
+    //  assign a color value to each pixel based on its heat value
     for (uint8_t i = 0; i < NUM_LEDS; i++)
     {
-        uint8_t scaledHeat = scale16(heat[i], 240);
+        uint8_t scaledHeat = scale16(heat[i + 20], 240);
         CRGB colour = ColorFromPalette(colorPalette, scaledHeat, 255, LINEARBLEND);
         FastLED.leds()[i] = colour;
     }

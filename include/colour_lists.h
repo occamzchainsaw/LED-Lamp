@@ -3,8 +3,7 @@
  *
  * Created on Thu Jul 22 2021
  * 
- * Header file containing definitions of availabe colour lists for the rotating palette effect.
- * Using std::vector, cause multidimenstional arrays will drive me insane.
+ * Header file containing definitions of availabe colour lists for the rotating palette effect and other stuff.
  *
  * Copyright (c) 2021 occamzchainsaw
  */
@@ -13,18 +12,6 @@
 #include <vector>
 #include <list>
 
-//  pretty standard rainbow
-std::list<CRGB> CLRainbow = {
-    CRGB(255,   0,     0),      //  red
-    CRGB(171,   85,    0),      //  orange
-    CRGB(171,   171,   0),      //  yellow
-    CRGB(0,     255,   0),      //  green
-    CRGB(0,     171,   85),     //  aqua
-    CRGB(0,     0,     255),    //  blue
-    CRGB(85,    0,     171),    //  purple
-    CRGB(171,   0,     85)      //  pink
-};
-
 CRGBPalette16 Rainbow = {
     0xFF0000, 0xFF5E00, 0xFFBB00, 0xE5FF00,
     0x88FF00, 0x2BFF00, 0x00FF33, 0x00FF91,
@@ -32,106 +19,7 @@ CRGBPalette16 Rainbow = {
     0x6600FF, 0xC300FF, 0xFF00DD, 0xFF0055
 };
 
-//  some ocean vibes, stolen from FastLED, ofc
-std::list<CRGB> CLOcean = {
-    CRGB::MidnightBlue,
-    CRGB::DarkBlue,
-    CRGB::Navy,
-    CRGB::MediumBlue,
-    CRGB::SeaGreen,
-    CRGB::Teal,
-    CRGB::CadetBlue,
-    CRGB::Blue,
-    CRGB::DarkCyan,
-    CRGB::CornflowerBlue,
-    CRGB::Aquamarine,
-    CRGB::Aqua,
-    CRGB::LightSkyBlue
-};
-
-//  In vector form as well
-std::vector<CRGB> CVOcean = {
-    CRGB::MidnightBlue,
-    CRGB::DarkBlue,
-    CRGB::Navy,
-    CRGB::MediumBlue,
-    CRGB::SeaGreen,
-    CRGB::Teal,
-    CRGB::CadetBlue,
-    CRGB::Blue,
-    CRGB::DarkCyan,
-    CRGB::CornflowerBlue,
-    CRGB::Aquamarine,
-    CRGB::Aqua,
-    CRGB::LightSkyBlue
-};
-
-//  stolen forest stuff
-std::list<CRGB> CLForest = {
-    CRGB::DarkGreen,
-    CRGB::DarkOliveGreen,
-    CRGB::Green,
-    CRGB::ForestGreen,
-    CRGB::OliveDrab,
-    CRGB::SeaGreen,
-    CRGB::MediumAquamarine,
-    CRGB::LimeGreen,
-    CRGB::YellowGreen,
-    CRGB::LightGreen,
-    CRGB::LawnGreen,
-};
-
-std::vector<CRGB> CVForest = {
-    CRGB::DarkGreen,
-    CRGB::DarkOliveGreen,
-    CRGB::Green,
-    CRGB::ForestGreen,
-    CRGB::OliveDrab,
-    CRGB::SeaGreen,
-    CRGB::MediumAquamarine,
-    CRGB::LimeGreen,
-    CRGB::YellowGreen,
-    CRGB::LightGreen,
-    CRGB::LawnGreen,
-};
-
-//  heat map more or less like the black body radiator
-std::list<CRGB> CLHeatMapBlackBody = {
-    CRGB(0,   0,   0),          //  black
-    CRGB(51,  0,   0),
-    CRGB(102, 0,   0),
-    CRGB(153, 0,   0),
-    CRGB(204, 0,   0),
-    CRGB(255, 0,   0),          //  red
-    CRGB(255, 51,  0),
-    CRGB(255, 102, 0),
-    CRGB(255, 153, 0),
-    CRGB(255, 204, 0),
-    CRGB(255, 255, 0),          //  yellow
-    CRGB(255, 255, 51),
-    CRGB(255, 255, 102),
-    CRGB(255, 255, 153),
-    CRGB(255, 255, 204),
-    CRGB(255, 255, 255)         //  white
-};
-
-std::vector<CRGB> CLHeatMap = {
-    CRGB(0,   0,   0),          //  black
-    CRGB(64,  0,   0),
-    CRGB(128, 0,   0),
-    CRGB(192, 0,   0),
-    CRGB(255, 0,   0),
-    CRGB(255, 64,  0),
-    CRGB(255, 128, 0),
-    CRGB(255, 192, 0),
-    CRGB(255, 255, 0),
-    CRGB(255, 255, 64),
-    CRGB(255, 255, 128)
-    // CRGB(255, 255, 153),
-    // CRGB(255, 255, 204),
-    // CRGB(255, 255, 204)         //  white
-};
-
+//  Fire palettes with different base colours
 CRGBPalette16 RedFire = {
     0x000000, 0x550000, 0xAA0000, 0xFF0000,
     0xFF1C00, 0xFF3800, 0xFF5400, 0xFF7000, 0xFF8C00, 0xFFA800, 0xFFC400, 0xFFE000,
@@ -150,6 +38,7 @@ CRGBPalette16 GreenFire = {
     0xFFFF00, 0xFFFF55, 0xFFFFAA, 0xFFFFFF
 };
 
+//  Pacifica (stolen from the one and only Kriegsman)
 CRGBPalette16 pacifica_palette_1 = {
     0x000507, 0x000409, 0x00030B, 0x00030D,
     0x000210, 0x000212, 0x000114, 0x000117, 

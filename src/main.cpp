@@ -94,11 +94,6 @@ void setup() {
 
 //  Main ESP32 loop
 void loop() {
-  //  Declare instances of the effects objects
-  SolidColourEffect solidColour(CRGB(70, 200, 0), true);
-  RainbowEffect rainbow;
-  rainbow.NumRainbows = 1;
-
   FastLED.setBrightness(150);
   
   for(;;)                                                                               //  A very tight loop - makes things faster
@@ -108,8 +103,8 @@ void loop() {
     // EVERY_N_MILLISECONDS(fpsToMillis(50))
     // {
       //FireEffect(RedFire);
-      ColorRotationEffect(Rainbow, 1000);
-    //}
+      //ColorRotationEffect(Rainbow, 1000);
+      OscillatingRainbow();
     
     //g_brightness = 150;
 
