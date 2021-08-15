@@ -2,7 +2,7 @@
  * main.cpp
  *
  * Created on         Sun Jan 10 2021
- * Last modified on   Tue Aug 04 2021
+ * Last modified on   Sun Aug 15 2021
  *
  * Copyright (c) 2021 occamzchainsaw
  */
@@ -20,11 +20,11 @@
 //  in them, from this main.cpp file
 #include <helpers.h>
 #include <colour_lists.h>
-#include <light_control.h>
 #include <solid_colour.h>
 #include <colour_rotation.h>
 #include <lit_stuff.h>
 #include <rainbows.h>
+#include <pacifica.h>
 
 //  stuff for the OLED display
 #define OLED_CLOCK  15                                              //  OLED clock pin
@@ -100,13 +100,10 @@ void loop() {
   {
     //  TESTING SECTION
 
-    // EVERY_N_MILLISECONDS(fpsToMillis(50))
-    // {
       //FireEffect(RedFire);
       //ColorRotationEffect(Rainbow, 1000);
-      OscillatingRainbow();
-    
-    //g_brightness = 150;
+      //OscillatingRainbow();
+      pacifica_loop();
 
     //  Handle the OLED Display
     g_OLED.home();

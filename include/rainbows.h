@@ -15,8 +15,8 @@
 
 #include <helpers.h>
 
-#define RUN_SPEED 2
-#define CYCLE_TIME 6
+#define RUN_SPEED   2
+#define CYCLE_TIME  6
 
 void StaticRainbow()
 {
