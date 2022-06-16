@@ -167,6 +167,19 @@ byte parseColor(String color)
   return (byte)fColor;
 }
 
+CRGB parseHexCode(std::string color)
+{
+  std::string sRed = color.substr(0, 2);
+  std::string sGreen = color.substr(2, 2);
+  std::string sBlue = color.substr(4, 2);
+
+  uint r = std::stoi(sRed, nullptr, 16);
+  uint g = std::stoi(sGreen, nullptr, 16);
+  uint b = std::stoi(sBlue, nullptr, 16);
+
+  return CRGB(r, g, b);
+}
+
 byte parseDelta(String deltaHue)
 {
   float fDelta = deltaHue.toFloat();

@@ -12,8 +12,11 @@
 #define FASTLED_INTERNAL
 #include <FastLED.h>                                                //  Great lib for the LEDs
 #include <Wifi.h>                                                   //  Handling the WiFi connection
-#include <ESPAsyncWebServer.h>                                      //  Asynchronous WebServer <3
+#include <SPIFFS.h>                                                 //  FileSystem
 #include "ArduinoJson.h"
+#include <ESPmDNS.h>
+#include "ESPAsyncWebServer.h"
+#include "AsyncJson.h"
 
 //  My own includes, such as effects, website, and helper functions.
 //  These need to be down here, cause I'll use some extern variables
@@ -53,7 +56,8 @@ AsyncWebServer server(80);
 CRGB g_LEDs[NUM_LEDS] = {0};                                          //  Frame buffer for FastLED                                         
 uint8_t g_brightness = 50;                                            //  Brightness level for FastLED
 
-uint effect_selector = 0;
+uint8_t effect_selector = 0;
+uint8_t option_selector = 0;
 
 byte g_red1, g_green1, g_blue1, g_red2, g_green2, g_blue2;
 byte rainbow_speed, rainbow_init_hue, rainbow_delta;
@@ -65,7 +69,7 @@ int wifiTries = 0;
 //  The setup routine runs when the ESP32 starts.
 //  It's used to configure some stuff for the OLED, the FastLED object, connect to the WiFi, and start the WebServer
 void setup() {
-  //Serial.begin(9600);                                               //  Used for serial monitor, if debugging is needed
+  Serial.begin(9600);                                                 //  Used for serial monitor, if debugging is needed
 
   pinMode(PIN_LED, OUTPUT);                                           //  Set the LED data pin to output mode
 
@@ -84,12 +88,79 @@ void setup() {
   set_max_power_in_milliwatts(MAX_POWER);                             //  We wouldn't wanna blow anything up, would we now?
 
   //  Try to connect to the WiFi 5 times. If not possible, just move on.
+  WiFi.mode(WIFI_STA);
   WiFi.begin(ssid, password);
   while ((WiFi.status() != WL_CONNECTED) && (wifiTries < 5))
   {
     delay(500);
     wifiTries++;
   }
+  if(WiFi.status() == WL_CONNECTED)
+  {
+    Serial.println(WiFi.localIP());
+  }
+
+  if(!SPIFFS.begin(true))
+  {
+    Serial.println("Error while mounting SPIFFS...");
+    return;
+  }
+
+  MDNS.begin("rgb-controller");
+
+  //  DefaultHeaders for the browser
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, PUT");
+  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "*");
+
+  //  Webserver stuff
+  // server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
+  //   request->send(SPIFFS, "/index.html", String());
+  // });
+
+  // server.on("/index.css", HTTP_GET, [](AsyncWebServerRequest *request){
+  //   request->send(SPIFFS, "/index.css", "text/css");
+  // });
+
+  // server.on("/index.js", HTTP_GET, [](AsyncWebServerRequest *request){
+  //   request->send(SPIFFS, "/index.js", "text/script");
+  // });
+
+  server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+
+  //  Handler for the JSON
+  server.addHandler(new AsyncCallbackJsonWebHandler("/led", [](AsyncWebServerRequest *request, JsonVariant &json) {
+    const JsonObject &jsonObj = json.as<JsonObject>();
+    if (jsonObj["effect"] == "solid")
+    {
+      Serial.println("Solid Colour Effect selected");
+      effect_selector = 1;
+      std::string sCol = jsonObj["option1"];
+      CRGB col = parseHexCode(sCol);
+
+      Serial.printf("Input: %s \n", sCol);
+      Serial.printf("Output: %d, %d, %d", col.r, col.g, col.b);
+    }
+    else if (jsonObj["effect"] == "fire")
+    {
+      Serial.println("BLAZE IT.");
+    }
+    request->send(200, "SOLID");
+  }));
+
+  server.onNotFound([](AsyncWebServerRequest *request) {
+    if (request->method() == HTTP_OPTIONS)
+    {
+      request->send(200);                   // send OK if options
+    }
+    else
+    {
+      Serial.println("Not found!");
+      request->send(404, "Not found");      // otherwise, send NOT FOUND
+    }
+  });
+
+  server.begin();
 }
 
 //  Main ESP32 loop
@@ -103,13 +174,14 @@ void loop() {
       //FireEffect(RedFire);
       //ColorRotationEffect(Rainbow, 1000);
       //OscillatingRainbow();
-      pacifica_loop();
+      //pacifica_loop();
+      RunningRainbow(false);
 
     //  Handle the OLED Display
     g_OLED.home();
     g_OLED.clearBuffer();
 
-    EVERY_N_MILLISECONDS(5000)                                                          //  only update the OLED display every second, no need to go faster
+    EVERY_N_MILLISECONDS(5000)                                                          //  only update the OLED display every 5 seconds, no need to go faster
     {
       calculate_actual_power();
       g_OLED.setCursor(X_PADDING, Y_PADDING + g_LineHeight);

@@ -8,64 +8,97 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="index.js"></script>
-    <script src="color-picker/html5kellycolorpicker.min.js"></script>
     <script>
         $(document).ready(function(){
             $("a").click(function(){
-                $("a").removeClass("active");
-                $(this).addClass("active");
+                $("a").removeClass("active-link");
+                $(this).addClass("active-link");
             });
         });
     </script>
     <title>LED Lamp Control</title>
 </head>
+    
 <body>
-    <div class="navbar">
-        <a href="#" class="active" onclick="openPage('tab_solid', this)" id="default">Solid Colour</a>
-        <a href="#" onclick="openPage('tab_rotation', this)">Colour Rotation</a>
-        <a href="#" onclick="openPage('tab_rainbows', this)">Rainbows</a>
-        <a href="#" onclick="openPage('tab_fire', this)">Fire Effect</a>
+    <div class="nav_bar">
+        <a href="#solid" onclick="openPage('tab_solid', this)" class="nav_link active-link" id="default">
+            <i class="material-icons md-48">circle</i>
+        </a>
+        <a href="#rotation" onclick="openPage('tab_rotation', this)" class="nav_link">
+            <i class="material-icons md-48">pending</i>
+        </a>
+        <a href="#fire" onclick="openPage('tab_fire', this)" class="nav_link">
+            <i class="material-icons md-48">local_fire_department</i>
+        </a>
+        <a href="#rainbows" onclick="openPage('tab_rainbows', this)" class="nav_link">
+            <i class="material-icons md-48">looks</i>
+        </a>
+        <a href="#pacifica" onclick="openPage('tab_pacifica', this)" class="nav_link">
+            <i class="material-icons md-48">water</i>
+        </a>
     </div>
 
     <div id="tab_solid" class="tabcontent">
         <h1>Solid Colour Control</h1>
-        <h3>Select a colour to light up the whole lamp with</h3>
-        <div class="box">
-            <canvas id="color-picker"></canvas><div class="color" id="colorBox"></div>
+        <!-- <h3>Select a colour to light up the whole lamp with</h3> -->
+        <div class="table">
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #ff0000;"></button>
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #ff5e00;"></button>
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #ffbb00;"></button>
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #e5ff00;"></button>
+
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #88ff00;"></button>
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #2bff00;"></button>
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #00ff33;"></button>
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #00ff91;"></button>
+
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #00ffee;"></button>
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #00b3ff;"></button>
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #0055ff;"></button>
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #0800ff;"></button>
+
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #6600ff;"></button>
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #c300ff;"></button>
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #ff00dd;"></button>
+            <button class="colourButton" onclick="selectSolidColor(this)" style="background-color: #ff0055;"></button>
+        </div>
+        <div class="solidCheck">
+            <h3>Breathing</h3>
+            <input type="checkbox" id="solidBreathe"/>
+            <label for="solidBreathe" class="toggle">
+                <div class="sliderToggle"></div>
+            </label>
         </div>
     </div>
+
     <div id="tab_rotation" class="tabcontent">
         <h1>Colour Rotation Control</h1>
         <h3>Select a palette of colours and watch the lamp rotate through it</h3>
     </div>
+
     <div id="tab_rainbows" class="tabcontent">
         <h1>Rainbows Control</h1>
         <h3>Knock yourself out with a rainbow puke</h3>
         <h3>The rainbow may be statically displayed, run up or down the lamp, or oscillate through it</h3>
     </div>
+
     <div id="tab_fire" class="tabcontent">
         <h1><span class="material-icons">local_fire_department</span> Fire Effect Control</h1>
         <h3>Set shit on fire. You can also choose a colour palette to have icy or green fire</h3>
     </div>
-    
-    <!-- This always runs at the start, and does some initialization stuff for me -->
+
+    <div id="tab_pacifica" class="tabcontent">
+        <h1>Pacifica</h1>
+        <h3>Stolen without any permission whatsoever form the legend that is Mark Kriegsman</h3>
+    </div>
+
+    <div class="brightness">
+        <h3 id="bLabel">Brightness: 69</h3>
+        <input type="range" value="69" min="0" max="100" id="bSlider" onchange="updateBrightness()">
+    </div>
+
     <script>
         document.getElementById("default").click();
-        var picker = new KellyColorPicker({
-            place : 'color-picker',
-            size : 250,
-            alpha_slider : false,
-            color : '#0079ff',
-            userEvents: {
-                change : function(picker) {
-                    //console.log(picker.getCurColorRgb());
-                    var red = picker.getCurColorRgb().r;
-                    var green = picker.getCurColorRgb().g;
-                    var blue = picker.getCurColorRgb().b;
-                    document.getElementById("colorBox").style.backgroundColor = 'rgb(' + red + ',' + green + ',' + blue + ')';
-                }
-            }
-        });
     </script>
 </body>
 </html>
