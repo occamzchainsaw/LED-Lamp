@@ -73,12 +73,13 @@ class ColourRotationEffect
             LastFade = millis();
         }
 
-        void setupEffect(std::string selectedPalette)
+        void setupEffect(std::string selectedPalette, std::string staticTime)
         {
             this->resetLastFade();
             ColourPalette = PaletteMap[selectedPalette];
             Index = 0;
             CurrentColour = ColorFromPalette(ColourPalette, Index);
+            StaticTime = std::stoi(staticTime, nullptr, 32);
         }
 };
 

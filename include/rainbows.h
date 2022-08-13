@@ -34,9 +34,9 @@ class RainbowEffect
                 InvertRunDirection(invertRunDirection)
                 {
                     mapOptions = {
-                        {"running",     0},
-                        {"static",      1},
-                        {"oscillating", 2},
+                        {"running",     1},
+                        {"static",      2},
+                        {"oscillating", 3},
                     };
                 }
 
@@ -46,15 +46,15 @@ class RainbowEffect
         {
             switch (mapOptions[OptionSelector])
             {
-                case 0:
+                case 1:
                     RunningRainbow(InvertRunDirection);
                     break;
 
-                case 1:
+                case 2:
                     StaticRainbow();
                     break;
 
-                case 2:
+                case 3:
                     OscillatingRainbow();
                     break;
 
@@ -97,7 +97,7 @@ class RainbowEffect
 
         void setupEffect(std::string option, std::string invertRunDirection)
         {
-            OptionSelector = mapOptions[option];
+            OptionSelector = option;
             InvertRunDirection = parseBool(invertRunDirection);
         }
 };

@@ -52,16 +52,16 @@ AsyncWebServer server(80);
 #define PIN_LED   5                                                   //  Data pin number
 
 CRGB g_LEDs[NUM_LEDS] = {0};                                          //  Frame buffer for FastLED                                         
-uint8_t g_brightness = 50;                                            //  Brightness level for FastLED
+uint8_t g_brightness = 150;                                            //  Brightness level for FastLED
 
 std::string g_effect = "";
 std::string g_option1 = "";
 std::string g_option2 = "";
 std::map<std::string, int> effectMap = {
-  {"solid",     0},
-  {"palette",   1},
-  {"rainbow",   2},
-  {"fire",      3}
+  {"solid",     1},
+  {"palette",   2},
+  {"rainbow",   3},
+  {"fire",      4}
 };
 
 byte g_red1, g_green1, g_blue1, g_red2, g_green2, g_blue2;
@@ -120,6 +120,7 @@ void setup() {
 
   // REQUEST EXAMPLE
   // http://192.168.88.196/get-effect?brightness=75&effect=fire&option1=redFire
+  // http://192.168.0.104/get-effect?brightness=50&effect=rainbow&option1=running&option2=false
   server.on("/get-effect", HTTP_ANY, [](AsyncWebServerRequest *request){
     StaticJsonDocument<500> doc;
     if(request->hasParam("brightness"))
@@ -166,15 +167,15 @@ void setup() {
 
     switch (effectMap[g_effect])
     {
-      case 0:
+      case 1:
         solidColour.setupEffect(g_option1, g_option2);
         break;
       
-      case 1:
-        paletteEffect.setupEffect(g_option1);
+      case 2:
+        paletteEffect.setupEffect(g_option1, g_option2);
         break;
       
-      case 2:
+      case 3:
         rainbowEffect.setupEffect(g_option1, g_option2);
         break;
     }
@@ -197,23 +198,23 @@ void loop() {
     // EFFECT SELECTION AND OPTION HANDLING
     switch (effectMap[g_effect])
     {
-      default:
-        rainbowEffect.drawSelected();
-        break;
-
       case 0:
-        solidColour.draw(g_brightness);
+        rainbowEffect.drawSelected();
         break;
 
       case 1:
-        paletteEffect.draw();
+        solidColour.draw(g_brightness);
         break;
 
       case 2:
-        rainbowEffect.drawSelected();
+        paletteEffect.draw();
         break;
 
       case 3:
+        rainbowEffect.drawSelected();
+        break;
+
+      case 4:
         FireEffect(PaletteMap[g_option1]);
         break;
     }

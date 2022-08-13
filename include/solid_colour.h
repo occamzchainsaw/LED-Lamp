@@ -38,6 +38,7 @@ class SolidColourEffect
 
         void draw(uint8_t setBrightness)
         {
+            //LastDraw = millis();
             uint8_t brightness = setBrightness;                             //  If we don't breathe, just use the set point
             if (IsBreathing)
             {
