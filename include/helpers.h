@@ -161,9 +161,9 @@ CRGB mapU8toCRGB(uint8_t input, std::vector<CRGB> colours)
 
 //  bunch of parsers for the web server
 
-byte parseColor(String color)
+byte parseColor(std::string color)
 {
-  float fColor = color.toFloat();
+  float fColor = std::stof(color);
   return (byte)fColor;
 }
 
@@ -180,22 +180,28 @@ CRGB parseHexCode(std::string color)
   return CRGB(r, g, b);
 }
 
-byte parseDelta(String deltaHue)
+byte parseDelta(std::string deltaHue)
 {
-  float fDelta = deltaHue.toFloat();
+  float fDelta = std::stof(deltaHue);
   return (byte)fDelta;
 }
 
-byte parseBrightness(String b)
+byte parseBrightness(std::string b)
 {
-    float brite = b.toFloat() / 100.0f;
-    return brite * 255;
+  float brite = std::stof(b) / 100.0f;
+  return brite * 255;
 }
 
-bool parseBool(String sBool)
+uint32_t scaleBrightness(int input)
 {
-    if (sBool == "true")
-        return true;
-    else
-        return false;
+  float scaledPerc = static_cast<float>(input) / 100.0f;
+  return static_cast<int>(scaledPerc * 100.0f);
+}
+
+bool parseBool(std::string sBool)
+{
+  if (sBool == "true")
+      return true;
+  else
+      return false;
 }

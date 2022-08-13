@@ -3,7 +3,7 @@
  *
  * Created on Wed Aug 04 2021
  * 
- * Static, running, oscillating rainbows.
+ * Object holding all the rainbow effects with a selector Static, running, oscillating rainbows.
  *
  * Copyright (c) 2021 occamzchainsaw
  */
@@ -18,33 +18,86 @@
 #define RUN_SPEED   2
 #define CYCLE_TIME  6
 
-void StaticRainbow()
+class RainbowEffect
 {
-    for (int i = 0; i < NUM_LEDS; i++)
-    {
-        float percentile = (float)i / (float)NUM_LEDS;
-        uint8_t hue = (uint8_t)(percentile * 256);
-        CHSV color;
-        color.h = hue;
-        color.s = 240;
-        color.v = 255;
-        FastLED.leds()[i] = color;
-    }
-}
+    protected:
+        std::string OptionSelector;
+        bool InvertRunDirection;
+        std::map<std::string, int> mapOptions;
 
-void RunningRainbow(bool inverted)
-{
-    static uint8_t hue = inverted ? 0 : 255;
+    public:
+        //  RainbowEffect
+        //
+        //  Constructor - pretty much only selects the effect. Initial values only, some setters will follow.
+        RainbowEffect(std::string optionSelector = "", bool invertRunDirection = false)
+            :   OptionSelector(optionSelector),
+                InvertRunDirection(invertRunDirection)
+                {
+                    mapOptions = {
+                        {"running",     0},
+                        {"static",      1},
+                        {"oscillating", 2},
+                    };
+                }
 
-    if (inverted) {   hue = (hue >= 255) ? 0 : (hue + RUN_SPEED); }
-    else {  hue = (hue <= 0) ? 255 : (hue - RUN_SPEED); }
+        ~RainbowEffect() {  }
 
-    fill_rainbow(FastLED.leds(), NUM_LEDS, hue, 1);
-}
+        void drawSelected()
+        {
+            switch (mapOptions[OptionSelector])
+            {
+                case 0:
+                    RunningRainbow(InvertRunDirection);
+                    break;
 
-void OscillatingRainbow()
-{
-    int bpm = 60 / CYCLE_TIME;
-    uint8_t hue = beatsin8(bpm);
-    fill_rainbow(FastLED.leds(), NUM_LEDS, hue, 1);
-}
+                case 1:
+                    StaticRainbow();
+                    break;
+
+                case 2:
+                    OscillatingRainbow();
+                    break;
+
+                default:
+                    RunningRainbow(false);
+                    break;
+            }
+        }
+
+        void StaticRainbow()
+        {
+            for (int i = 0; i < NUM_LEDS; i++)
+            {
+                float percentile = (float)i / (float)NUM_LEDS;
+                uint8_t hue = (uint8_t)(percentile * 256);
+                CHSV color;
+                color.h = hue;
+                color.s = 240;
+                color.v = 255;
+                FastLED.leds()[i] = color;
+            }
+        }
+
+        void RunningRainbow(bool inverted)
+        {
+            static uint8_t hue = inverted ? 0 : 255;
+
+            if (inverted) {   hue = (hue >= 255) ? 0 : (hue + RUN_SPEED); }
+            else {  hue = (hue <= 0) ? 255 : (hue - RUN_SPEED); }
+
+            fill_rainbow(FastLED.leds(), NUM_LEDS, hue, 1);
+        }
+
+        void OscillatingRainbow()
+        {
+            int bpm = 60 / CYCLE_TIME;
+            uint8_t hue = beatsin8(bpm);
+            fill_rainbow(FastLED.leds(), NUM_LEDS, hue, 1);
+        }
+
+        void setupEffect(std::string option, std::string invertRunDirection)
+        {
+            OptionSelector = mapOptions[option];
+            InvertRunDirection = parseBool(invertRunDirection);
+        }
+};

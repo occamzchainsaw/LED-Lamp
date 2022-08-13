@@ -2,7 +2,7 @@
  * main.cpp
  *
  * Created on         Sun Jan 10 2021
- * Last modified on   Sun Aug 15 2021
+ * Last modified on   Sat Aug 13 2022
  *
  * Copyright (c) 2021 occamzchainsaw
  */
@@ -12,9 +12,7 @@
 #define FASTLED_INTERNAL
 #include <FastLED.h>                                                //  Great lib for the LEDs
 #include <Wifi.h>                                                   //  Handling the WiFi connection
-#include <SPIFFS.h>                                                 //  FileSystem
 #include "ArduinoJson.h"
-#include <ESPmDNS.h>
 #include "ESPAsyncWebServer.h"
 #include "AsyncJson.h"
 
@@ -56,15 +54,31 @@ AsyncWebServer server(80);
 CRGB g_LEDs[NUM_LEDS] = {0};                                          //  Frame buffer for FastLED                                         
 uint8_t g_brightness = 50;                                            //  Brightness level for FastLED
 
-uint8_t effect_selector = 0;
-uint8_t option_selector = 0;
+std::string g_effect = "";
+std::string g_option1 = "";
+std::string g_option2 = "";
+std::map<std::string, int> effectMap = {
+  {"solid",     0},
+  {"palette",   1},
+  {"rainbow",   2},
+  {"fire",      3}
+};
 
 byte g_red1, g_green1, g_blue1, g_red2, g_green2, g_blue2;
 byte rainbow_speed, rainbow_init_hue, rainbow_delta;
 int breathe_cycle, rainbow_cycle;
 bool g_breathing, rainbow_run, rainbow_down;
 
+SolidColourEffect solidColour = SolidColourEffect();
+ColourRotationEffect paletteEffect = ColourRotationEffect();
+RainbowEffect rainbowEffect = RainbowEffect();
+
 int wifiTries = 0;
+
+void notFound(AsyncWebServerRequest *request)
+{
+    request->send(404, "application/json", "{\"message\":\"Not Found\"}");
+}
 
 //  The setup routine runs when the ESP32 starts.
 //  It's used to configure some stuff for the OLED, the FastLED object, connect to the WiFi, and start the WebServer
@@ -100,65 +114,76 @@ void setup() {
     Serial.println(WiFi.localIP());
   }
 
-  if(!SPIFFS.begin(true))
-  {
-    Serial.println("Error while mounting SPIFFS...");
-    return;
-  }
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(200, "applicaiton/json", "{\"message\":\"Hello my dude\"}");
+  });
 
-  MDNS.begin("rgb-controller");
-
-  //  DefaultHeaders for the browser
-  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
-  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "GET, PUT");
-  DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "*");
-
-  //  Webserver stuff
-  // server.on("/", HTTP_GET, [](AsyncWebServerRequest *request){
-  //   request->send(SPIFFS, "/index.html", String());
-  // });
-
-  // server.on("/index.css", HTTP_GET, [](AsyncWebServerRequest *request){
-  //   request->send(SPIFFS, "/index.css", "text/css");
-  // });
-
-  // server.on("/index.js", HTTP_GET, [](AsyncWebServerRequest *request){
-  //   request->send(SPIFFS, "/index.js", "text/script");
-  // });
-
-  server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
-
-  //  Handler for the JSON
-  server.addHandler(new AsyncCallbackJsonWebHandler("/led", [](AsyncWebServerRequest *request, JsonVariant &json) {
-    const JsonObject &jsonObj = json.as<JsonObject>();
-    if (jsonObj["effect"] == "solid")
+  // REQUEST EXAMPLE
+  // http://192.168.88.196/get-effect?brightness=75&effect=fire&option1=redFire
+  server.on("/get-effect", HTTP_ANY, [](AsyncWebServerRequest *request){
+    StaticJsonDocument<500> doc;
+    if(request->hasParam("brightness"))
     {
-      Serial.println("Solid Colour Effect selected");
-      effect_selector = 1;
-      std::string sCol = jsonObj["option1"];
-      CRGB col = parseHexCode(sCol);
-
-      Serial.printf("Input: %s \n", sCol);
-      Serial.printf("Output: %d, %d, %d", col.r, col.g, col.b);
-    }
-    else if (jsonObj["effect"] == "fire")
-    {
-      Serial.println("BLAZE IT.");
-    }
-    request->send(200, "SOLID");
-  }));
-
-  server.onNotFound([](AsyncWebServerRequest *request) {
-    if (request->method() == HTTP_OPTIONS)
-    {
-      request->send(200);                   // send OK if options
+      doc["brightness"] = request->getParam("brightness")->value();
+      g_brightness = scaleBrightness(doc["brightness"].as<int>());
     }
     else
     {
-      Serial.println("Not found!");
-      request->send(404, "Not found");      // otherwise, send NOT FOUND
+      doc["brightness"] = 0;
     }
+
+    if(request->hasParam("effect"))
+    {
+      doc["effect"] = request->getParam("effect")->value();
+      g_effect = doc["effect"].as<std::string>();
+      //Serial.println(effect);
+    }
+    else
+    {
+      doc["effect"] = "No effect parameter";
+    }
+
+    if(request->hasParam("option1"))
+    {
+      doc["option1"] = request->getParam("option1")->value();
+      g_option1 = doc["option1"].as<std::string>();
+      //Serial.println(option);
+    }
+    else
+    {
+      doc["option1"] = "No value";
+    }
+
+    if(request->hasParam("option2"))
+    {
+      doc["option2"] = request->getParam("option2")->value();
+      g_option2 = doc["option2"].as<std::string>();
+    }
+    else
+    {
+      doc["option2"] = "No value";
+    }
+
+    switch (effectMap[g_effect])
+    {
+      case 0:
+        solidColour.setupEffect(g_option1, g_option2);
+        break;
+      
+      case 1:
+        paletteEffect.setupEffect(g_option1);
+        break;
+      
+      case 2:
+        rainbowEffect.setupEffect(g_option1, g_option2);
+        break;
+    }
+
+    String response;
+    serializeJson(doc, response);
+    request->send(200, "application/json", response);
   });
+  server.onNotFound(notFound);
 
   server.begin();
 }
@@ -169,13 +194,29 @@ void loop() {
   
   for(;;)                                                                               //  A very tight loop - makes things faster
   {
-    //  TESTING SECTION
+    // EFFECT SELECTION AND OPTION HANDLING
+    switch (effectMap[g_effect])
+    {
+      default:
+        rainbowEffect.drawSelected();
+        break;
 
-      //FireEffect(RedFire);
-      //ColorRotationEffect(Rainbow, 1000);
-      //OscillatingRainbow();
-      //pacifica_loop();
-      RunningRainbow(false);
+      case 0:
+        solidColour.draw(g_brightness);
+        break;
+
+      case 1:
+        paletteEffect.draw();
+        break;
+
+      case 2:
+        rainbowEffect.drawSelected();
+        break;
+
+      case 3:
+        FireEffect(PaletteMap[g_option1]);
+        break;
+    }
 
     //  Handle the OLED Display
     g_OLED.home();
@@ -199,7 +240,7 @@ void loop() {
       g_OLED.sendBuffer();
     }
 
-    uint8_t scaledBri = calculate_max_brightness_for_power_mW(FastLED.leds(), FastLED.size(), 180, MAX_POWER);
+    uint8_t scaledBri = calculate_max_brightness_for_power_mW(FastLED.leds(), FastLED.size(), g_brightness, MAX_POWER);
     FastLED.setBrightness(scaledBri);
     FastLED.show();
     FastLED.delay(fpsToMillis(50));

@@ -8,6 +8,7 @@
  * Copyright (c) 2021 occamzchainsaw
  */
 
+#pragma once
 #include <FastLED.h>
 #include <vector>
 #include <list>
@@ -36,4 +37,11 @@ CRGBPalette16 GreenFire = {
     0x000000, 0x005500, 0x00AA00, 0x00FF00,
     0x1CFF00, 0x38FF00, 0x54FF00, 0x70FF00, 0x8CFF00, 0xA8FF00, 0xC4FF00, 0xFEFF00,
     0xFFFF00, 0xFFFF55, 0xFFFFAA, 0xFFFFFF
+};
+
+std::map<std::string, CRGBPalette16> PaletteMap = {
+    {"rainbow", Rainbow},
+    {"redFire", RedFire},
+    {"blueFire", BlueFire},
+    {"greenFire", GreenFire}
 };

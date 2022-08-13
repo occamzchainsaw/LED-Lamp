@@ -65,8 +65,13 @@ void FireEffect(CRGBPalette16 colorPalette)
         }
     }
 
-//  quick clear of the strip before drawing
+    //  quick clear of the strip before drawing
     FastLED.clear();
+
+    //  QUICK COOL IDEA FOR LATER:
+    //  Don't clear the strip at every frame, but rather fade the current state of it to a third of the brightness (or so)
+    //  and 3 frames later the old state would be gone. The subsequent frames should look smoother like this.
+
 
     //  assign a color value to each pixel based on its heat value
     for (uint8_t i = 0; i < NUM_LEDS; i++)

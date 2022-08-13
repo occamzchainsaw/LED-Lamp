@@ -20,7 +20,6 @@ class SolidColourEffect
         bool IsBreathing;                       //  turns on thr breathing effect
         uint32_t LastDraw;                      //  for handling the breathing smoothly
         uint8_t BrightnessDelta;                //  same here
-
         const uint8_t MinBrightness = 15;       //  if we go lower, it looks way too dim
 
     public:
@@ -52,5 +51,11 @@ class SolidColourEffect
             }
             fill_solid(FastLED.leds(), FastLED.size(), Colour);
             FastLED.setBrightness(brightness);
+        }
+
+        void setupEffect(std::string inColour, std::string breathing)
+        {
+            Colour = parseHexCode(inColour);
+            IsBreathing = parseBool(breathing);
         }
 };
