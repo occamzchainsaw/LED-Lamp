@@ -2,7 +2,7 @@
  * main.cpp
  *
  * Created on         Sun Jan 10 2021
- * Last modified on   Sat Aug 13 2022
+ * Last modified on   Fri May 05 2023
  *
  * Copyright (c) 2021 occamzchainsaw
  */
@@ -42,8 +42,11 @@ uint g_oled_width = 0;
 uint g_oled_height = 0;
 
 //  WiFi credentials      *** THIS NEEDS TO BE CHANGED TO THE DESIRED CREDENTIALS EVERY TIME  ***
-const char* ssid =      "FBI Surveillance Van #9973";
+const char* ssid =      "Get Your Own Wi-Fi";
 const char* password =  "e4e5Nf3Nc6Bb5";
+IPAddress local_ip(192,168,0,194);
+IPAddress gateway(192,168,0,1);
+IPAddress mask(255,255,255,0);
 
 //  Webserver talking on port 80
 AsyncWebServer server(80);
@@ -52,7 +55,7 @@ AsyncWebServer server(80);
 #define PIN_LED   5                                                   //  Data pin number
 
 CRGB g_LEDs[NUM_LEDS] = {0};                                          //  Frame buffer for FastLED                                         
-uint8_t g_brightness = 150;                                            //  Brightness level for FastLED
+uint8_t g_brightness = 170;                                            //  Brightness level for FastLED
 
 std::string g_effect = "";
 std::string g_option1 = "";
@@ -102,10 +105,14 @@ void setup() {
   set_max_power_in_milliwatts(MAX_POWER);                             //  We wouldn't wanna blow anything up, would we now?
 
   //  Try to connect to the WiFi 5 times. If not possible, just move on.
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(ssid, password);
-  while ((WiFi.status() != WL_CONNECTED) && (wifiTries < 5))
+  if (!WiFi.config(local_ip, gateway, mask))
   {
+    Serial.println("STA failed to configure");
+  }
+  WiFi.begin(ssid, password);
+  while ((WiFi.status() != WL_CONNECTED) && (wifiTries < 10))
+  {
+    Serial.printf("Attempt number %i to connect to wifi\n", wifiTries+1);
     delay(500);
     wifiTries++;
   }
@@ -113,14 +120,20 @@ void setup() {
   {
     Serial.println(WiFi.localIP());
   }
+  else
+  {
+    Serial.println("Failed to connect to wifi");
+  }
 
   server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
-    request->send(200, "applicaiton/json", "{\"message\":\"Hello my dude\"}");
+    request->send(200, "application/json", "{\"message\":\"Hello there\"}");
   });
 
   // REQUEST EXAMPLE
   // http://192.168.88.196/get-effect?brightness=75&effect=fire&option1=redFire
   // http://192.168.0.104/get-effect?brightness=50&effect=rainbow&option1=running&option2=false
+  // CURL:
+  // curl -X "GET" "http:..."
   server.on("/get-effect", HTTP_ANY, [](AsyncWebServerRequest *request){
     StaticJsonDocument<500> doc;
     if(request->hasParam("brightness"))
@@ -137,7 +150,6 @@ void setup() {
     {
       doc["effect"] = request->getParam("effect")->value();
       g_effect = doc["effect"].as<std::string>();
-      //Serial.println(effect);
     }
     else
     {
@@ -148,7 +160,6 @@ void setup() {
     {
       doc["option1"] = request->getParam("option1")->value();
       g_option1 = doc["option1"].as<std::string>();
-      //Serial.println(option);
     }
     else
     {
@@ -191,8 +202,6 @@ void setup() {
 
 //  Main ESP32 loop
 void loop() {
-  FastLED.setBrightness(150);
-  
   for(;;)                                                                               //  A very tight loop - makes things faster
   {
     // EFFECT SELECTION AND OPTION HANDLING

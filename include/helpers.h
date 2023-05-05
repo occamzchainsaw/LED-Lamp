@@ -21,7 +21,7 @@ extern CRGB g_LEDs[];
 extern uint8_t g_brightness;
 
 #define NUM_LEDS    174                                             //  Number of LEDs on the whole strip
-#define MAX_POWER   18500                                           //  Power limit for FastLED
+#define MAX_POWER   19500                                           //  Power limit for FastLED
 
 #define ARRSIZE(x) (sizeof(x) / sizeof(*x))
 
