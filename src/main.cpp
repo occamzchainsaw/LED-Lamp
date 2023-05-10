@@ -129,6 +129,40 @@ void setup() {
     request->send(200, "application/json", "{\"message\":\"Hello there\"}");
   });
 
+  AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/post-json", 
+  [](AsyncWebServerRequest *request, JsonVariant &json){
+    StaticJsonDocument<JSON_OBJECT_SIZE(4)> doc;
+    deserializeJson(doc, json.as<const char*>());
+
+    g_brightness = doc["brightness"].as<int>() | 200;
+    g_effect = doc["effect"].as<std::string>();
+    g_option1 = doc["option1"].as<std::string>();
+    g_option2 = doc["option2"].as<std::string>();
+
+    Serial.printf("Brightness: %d\n", g_brightness);
+
+    switch (effectMap[g_effect])
+    {
+      case 1:
+        solidColour.setupEffect(g_option1, g_option2);
+        break;
+      
+      case 2:
+        paletteEffect.setupEffect(g_option1, g_option2);
+        break;
+      
+      case 3:
+        rainbowEffect.setupEffect(g_option1, g_option2);
+        break;
+    }
+
+    String response;
+    serializeJson(doc, response);
+    request->send(200, "application/json", response);
+    Serial.println(response);
+  });
+  server.addHandler(handler);
+
   // REQUEST EXAMPLE
   // http://192.168.88.196/get-effect?brightness=75&effect=fire&option1=redFire
   // http://192.168.0.104/get-effect?brightness=50&effect=rainbow&option1=running&option2=false
